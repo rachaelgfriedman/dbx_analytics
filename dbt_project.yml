@@ -3,7 +3,7 @@ name: 'analytics'
 version: '1.0.0'
 config-version: 2
 dbt-cloud:
-  project-id: 206289
+  project-id: 459030
 
 profile: 'analytics'
 
@@ -88,9 +88,6 @@ seeds:
         funded_date: date
         amount: decimal(18,2)
         interest_rate: decimal(6,3)
-
-snapshots:
-  +target_schema: snapshots_dev
 
 flags:
   require_generic_test_arguments_property: true
