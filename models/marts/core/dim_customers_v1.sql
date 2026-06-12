@@ -24,20 +24,26 @@ customer_tier as (
     select * from {{ ref('customer_tier') }}
 
 ),
+customer_flags as (
+
+    select * from {{ ref('customer_flags') }}
+
+),
 final as (
     select 
         customer.customer_key,
         customer.name,
         customer.address,
-        {# nation.nation_key as nation_key, #}
         nation.name as nation,
-        {# region.region_key as region_key, #}
         region.name as region,
         customer.phone_number,
         customer.account_balance,
         customer.market_segment,
         customer_tier.lifetime_value,
-        customer_tier.tier_name
+        customer_tier.tier_name,
+        customer_flags.is_high_value,
+        customer_flags.is_mid_value,
+        customer_flags.is_low_value
     from
         customer
         inner join nation
@@ -46,6 +52,8 @@ final as (
             on nation.region_key = region.region_key
         left join customer_tier
             on customer.customer_key = customer_tier.customer_key
+        left join customer_flags
+            on customer.customer_key = customer_flags.customer_key
 )
 select 
     *

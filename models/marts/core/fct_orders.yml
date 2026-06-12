@@ -1,0 +1,151 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: orders fact table
+    semantic_model:
+      enabled: true
+    agg_time_dimension: order_date
+    columns:
+      - name: order_key
+        description: primary key of the model
+        data_tests:
+          - unique
+          - not_null
+        entity:
+          type: primary
+          name: order
+      - name: customer_key
+        description: foreign key for customers
+        data_tests:
+          - relationships:
+              name: fct_orders_customer_key_refs_dim_customers_v1
+              config:
+                severity: error
+              arguments:
+                to: ref('dim_customers_v1')
+                field: customer_key
+        entity:
+          type: foreign
+          name: customer
+      - name: order_date
+        description: date of the order
+        dimension:
+          type: time
+        granularity: day
+      - name: status_code
+        description: status of the order
+        dimension:
+          type: categorical
+      - name: priority_code
+        description: code associated with the order
+        dimension:
+          type: categorical
+      - name: clerk_name
+        description: id of the clerk
+        dimension:
+          type: categorical
+      - name: ship_priority
+        description: numeric representation of the shipping priority, zero being the default
+        dimension:
+          type: categorical
+      - name: order_count
+        description: number of orders (includes returns)
+      - name: return_count
+        description: How many line items have the return flag in this order?
+      - name: gross_item_sales_amount
+        description: '{{ doc("gross_item_sales_amount") }}'
+      - name: item_discount_amount
+        description: '{{ doc("item_discount_amount") }}'
+      - name: item_tax_amount
+        description: '{{ doc("item_tax_amount") }}'
+      - name: net_item_sales_amount
+        description: '{{ doc("net_item_sales_amount") }}'
+    metrics:
+      - name: order_count
+        description: Count of orders
+        type: simple
+        label: Order Count
+        agg: sum
+      - name: order_return_count
+        description: Count of returned line items on orders
+        type: simple
+        label: Order Return Count
+        agg: sum
+        expr: return_count
+      - name: order_customer_count
+        description: Count of distinct customers placing orders
+        type: simple
+        label: Order Customer Count
+        agg: count_distinct
+        expr: customer_key
+      - name: order_gross_sales_amount
+        description: Gross item sales amount
+        type: simple
+        label: Order Gross Sales Amount
+        agg: sum
+        expr: gross_item_sales_amount
+      - name: order_discount_amount
+        description: Item discount amount
+        type: simple
+        label: Order Discount Amount
+        agg: sum
+        expr: item_discount_amount
+      - name: order_tax_amount
+        description: Item tax amount
+        type: simple
+        label: Order Tax Amount
+        agg: sum
+        expr: item_tax_amount
+      - name: order_net_sales_amount
+        description: Net item sales amount
+        type: simple
+        label: Order Net Sales Amount
+        agg: sum
+        expr: net_item_sales_amount
+
+metrics:
+  - name: order_avg_revenue_per_customer
+    description: Average net revenue per distinct customer placing orders.
+    type: ratio
+    label: Order Avg Revenue Per Customer
+    numerator: order_net_sales_amount
+    denominator: order_customer_count
+
+  - name: order_return_rate
+    description: Ratio of returned line items to orders.
+    type: ratio
+    label: Order Return Rate
+    numerator: order_return_count
+    denominator: order_count
+
+  - name: order_discount_rate
+    description: Ratio of discount amount to gross sales.
+    type: ratio
+    label: Order Discount Rate
+    numerator: order_discount_amount
+    denominator: order_gross_sales_amount
+
+  - name: cumulative_order_net_sales_amount
+    description: Running total of order net sales across all time.
+    type: cumulative
+    label: Cumulative Order Net Sales Amount
+    input_metric: order_net_sales_amount
+
+  - name: cumulative_order_net_sales_mtd
+    description: Month-to-date cumulative order net sales.
+    type: cumulative
+    label: Cumulative Order Net Sales MTD
+    grain_to_date: month
+    input_metric: order_net_sales_amount
+
+  - name: order_profit
+    description: Profit calculated as net sales minus total supplier cost.
+    type: derived
+    label: Order Profit
+    expr: revenue - cost
+    input_metrics:
+      - name: order_net_sales_amount
+        alias: revenue
+      - name: order_item_total_cost
+        alias: cost

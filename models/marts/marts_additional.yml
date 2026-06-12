@@ -1,0 +1,219 @@
+version: 2
+
+models:
+  - name: dim_associate
+    description: Associate dimension with slowly changing history and current-row flag.
+    columns:
+      - name: dim_associate_sk
+        description: Surrogate key for the associate dimension record.
+        data_tests:
+          - unique
+          - not_null
+      - name: associate_id
+        description: Natural key for the associate.
+      - name: associate_name
+        description: Associate name.
+      - name: role
+        description: Associate role.
+      - name: region
+        description: Associate region.
+      - name: hire_date
+        description: Associate hire date.
+      - name: dbt_valid_from
+        description: Timestamp when this SCD2 version became valid.
+      - name: dbt_valid_to
+        description: Timestamp when this SCD2 version stopped being valid.
+      - name: is_current
+        description: Whether this is the current associate record.
+
+  - name: dim_lead
+    description: Lead dimension with source, associate, and lifecycle attributes.
+    columns:
+      - name: dim_lead_sk
+        description: Surrogate key for the lead dimension record.
+        data_tests:
+          - unique
+          - not_null
+      - name: lead_id
+        description: Natural lead identifier.
+      - name: lead_source_id
+        description: Identifier for the source that generated the lead.
+      - name: associate_id
+        description: Identifier for the associate tied to the lead.
+      - name: created_date
+        description: Date the lead was created.
+      - name: status
+        description: Current lead status.
+      - name: state
+        description: Lead state.
+
+  - name: dim_lead_source
+    description: Lead source dimension.
+    columns:
+      - name: dim_lead_source_sk
+        description: Surrogate key for the lead source dimension record.
+        data_tests:
+          - unique
+          - not_null
+      - name: lead_source_id
+        description: Natural lead source identifier.
+      - name: source_name
+        description: Lead source name.
+      - name: channel
+        description: Marketing or acquisition channel.
+      - name: cost_bucket
+        description: Cost bucket associated with the source.
+      - name: category
+        description: Lead source category.
+
+  - name: dim_loan
+    description: Loan dimension with product and funding attributes.
+    columns:
+      - name: dim_loan_sk
+        description: Surrogate key for the loan dimension record.
+        data_tests:
+          - unique
+          - not_null
+      - name: loan_id
+        description: Natural loan identifier.
+      - name: product
+        description: Loan product.
+      - name: funded_date
+        description: Date the loan was funded.
+      - name: loan_purpose
+        description: Purpose of the loan.
+      - name: property_type
+        description: Property type tied to the loan.
+      - name: occupancy
+        description: Occupancy type for the underlying property.
+
+  - name: fact_lead_lifecycle
+    description: Fact table capturing lifecycle stage changes for leads.
+    columns:
+      - name: fact_lead_lifecycle_id
+        description: Identifier for the lifecycle fact row.
+        data_tests:
+          - unique
+          - not_null
+      - name: dim_lead_sk
+        description: Surrogate key to the lead dimension.
+      - name: dim_associate_sk
+        description: Surrogate key to the associate dimension.
+      - name: dim_lead_source_sk
+        description: Surrogate key to the lead source dimension.
+      - name: lead_id
+        description: Natural lead identifier.
+      - name: lifecycle_stage
+        description: Lifecycle stage name.
+      - name: associate_id
+        description: Natural associate identifier.
+      - name: stage_date
+        description: Date the lead entered the lifecycle stage.
+      - name: lead_source_id
+        description: Natural lead source identifier.
+
+  - name: fact_loan
+    description: Fact table capturing funded loans and related dimensional context.
+    columns:
+      - name: fact_loan_id
+        description: Identifier for the funded loan fact row.
+        data_tests:
+          - unique
+          - not_null
+      - name: dim_loan_sk
+        description: Surrogate key to the loan dimension.
+      - name: dim_lead_sk
+        description: Surrogate key to the lead dimension.
+      - name: dim_associate_sk
+        description: Surrogate key to the associate dimension.
+      - name: loan_id
+        description: Natural loan identifier.
+      - name: lead_id
+        description: Natural lead identifier.
+      - name: associate_id
+        description: Natural associate identifier.
+      - name: funded_date
+        description: Date the loan was funded.
+      - name: amount
+        description: Funded loan amount.
+      - name: interest_rate
+        description: Loan interest rate.
+
+  - name: customer_flags
+    description: Customer-level rollup of lifetime value and value-band flags.
+    columns:
+      - name: customer_key
+        description: Customer identifier.
+        data_tests:
+          - unique
+          - not_null
+      - name: lifetime_value
+        description: Sum of order value across a customer's history.
+      - name: is_high_value
+        description: Whether the customer is classified as high value.
+      - name: is_mid_value
+        description: Whether the customer is classified as mid value.
+      - name: is_low_value
+        description: Whether the customer is classified as low value.
+
+  - name: customer_struct
+    description: Customer-level metrics packed into a struct for downstream examples.
+    columns:
+      - name: customer_key
+        description: Customer identifier.
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_metrics
+        description: Struct containing customer lifetime value and tier attributes.
+
+  - name: customer_unpacked
+    description: Customer-level metrics unpacked from the customer struct model.
+    columns:
+      - name: customer_key
+        description: Customer identifier.
+        data_tests:
+          - unique
+          - not_null
+      - name: lifetime_value
+        description: Customer lifetime value unpacked from the struct.
+      - name: tier_name
+        description: Customer tier unpacked from the struct.
+      - name: estimated_tax
+        description: Example derived value calculated from lifetime value.
+
+  - name: agg_daily_returned_orders
+    description: Daily aggregate of returned order items.
+    columns:
+      - name: ds
+        description: Order date at day grain.
+        data_tests:
+          - unique
+          - not_null
+      - name: y
+        description: Daily returned order item count as a float.
+
+  - name: agg_returned_orders_by_month
+    description: Monthly aggregate of returned orders and return rate.
+    columns:
+      - name: order_month
+        description: Order month.
+        data_tests:
+          - unique
+          - not_null
+      - name: returned_orders
+        description: Count of returned order items in the month.
+      - name: return_rate
+        description: Share of order items returned in the month.
+      - name: row_count
+        description: Total order item row count in the month.
+
+  - name: supplier_sales_by_year
+    description: Supplier sales aggregated by shipping year.
+    columns:
+      - name: supplier_name
+        description: Supplier name.
+      - name: shipping_year
+        description: Shipping year derived from ship date.
+      - name: net_sales_amount
+        description: Net item sales amount aggregated to supplier and year.

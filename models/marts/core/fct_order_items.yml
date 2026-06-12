@@ -1,0 +1,179 @@
+version: 2
+
+models:
+  - name: fct_order_items
+    description: order items fact table
+    semantic_model:
+      enabled: true
+    agg_time_dimension: order_date
+    config:
+      group: data_team
+      access: public
+    columns:
+      - name: order_item_key
+        description: '{{ doc("order_item_key") }}'
+        data_tests:
+          - unique
+          - not_null
+        entity:
+          type: primary
+          name: order_item
+      - name: order_key
+        description: foreign key for orders
+        data_tests:
+          - relationships:
+              name: fct_order_items_order_key_refs_fct_orders
+              config:
+                severity: error
+              arguments:
+                to: ref('fct_orders')
+                field: order_key
+        entity:
+          type: foreign
+          name: order
+      - name: order_date
+        description: date of the order
+        dimension:
+          type: time
+        granularity: day
+      - name: customer_key
+        description: foreign key for customers
+        data_tests:
+          - relationships:
+              name: fct_order_items_customer_key_refs_dim_customers_v1
+              config:
+                severity: error
+              arguments:
+                to: ref('dim_customers_v1')
+                field: customer_key
+        entity:
+          type: foreign
+          name: customer
+      - name: part_key
+        description: foreign key for part
+        entity:
+          type: foreign
+          name: part
+      - name: supplier_key
+        description: foreign key for suppliers
+        data_tests:
+          - relationships:
+              name: fct_order_items_supplier_key_refs_dim_suppliers
+              config:
+                severity: error
+              arguments:
+                to: ref('dim_suppliers')
+                field: supplier_key
+        entity:
+          type: foreign
+          name: supplier
+      - name: order_item_status_code
+        description: status of the order item
+        dimension:
+          type: categorical
+      - name: is_return
+        description: return flag for the order item
+        dimension:
+          type: categorical
+          name: return_flag
+      - name: line_number
+        description: '{{ doc("line_number") }}'
+        dimension:
+          type: categorical
+      - name: ship_date
+        description: '{{ doc("ship_date") }}'
+        dimension:
+          type: time
+        granularity: day
+      - name: commit_date
+        description: '{{ doc("commit_date") }}'
+        dimension:
+          type: time
+        granularity: day
+      - name: receipt_date
+        description: '{{ doc("receipt_date") }}'
+        dimension:
+          type: time
+        granularity: day
+      - name: ship_mode
+        description: '{{ doc("ship_mode") }}'
+        dimension:
+          type: categorical
+      - name: supplier_cost
+        description: '{{ doc("cost") }}'
+      - name: base_price
+        description: '{{ doc("base_price") }}'
+      - name: discount_percentage
+        description: '{{ doc("discount_percentage") }}'
+      - name: discounted_price
+        description: '{{ doc("discounted_price") }}'
+      - name: tax_rate
+        description: '{{ doc("tax_rate") }}'
+      - name: nation_key
+        description: Nation key
+        data_tests:
+          - not_null
+        dimension:
+          type: categorical
+      - name: order_item_count
+        description: count of order items
+      - name: quantity
+        description: total units
+      - name: gross_item_sales_amount
+        description: '{{ doc("gross_item_sales_amount") }}'
+      - name: discounted_item_sales_amount
+        description: '{{ doc("discounted_item_sales_amount") }}'
+      - name: item_discount_amount
+        description: '{{ doc("item_discount_amount") }}'
+      - name: item_tax_amount
+        description: '{{ doc("item_tax_amount") }}'
+      - name: net_item_sales_amount
+        description: '{{ doc("net_item_sales_amount") }}'
+    metrics:
+      - name: order_item_count
+        description: Count of order items
+        type: simple
+        label: Order Item Count
+        agg: sum
+      - name: order_item_quantity
+        description: Total quantity ordered
+        type: simple
+        label: Order Item Quantity
+        agg: sum
+        expr: quantity
+      - name: order_item_gross_sales_amount
+        description: Gross item sales amount
+        type: simple
+        label: Order Item Gross Sales Amount
+        agg: sum
+        expr: gross_item_sales_amount
+      - name: order_item_discounted_sales_amount
+        description: Discounted item sales amount
+        type: simple
+        label: Order Item Discounted Sales Amount
+        agg: sum
+        expr: discounted_item_sales_amount
+      - name: order_item_discount_amount
+        description: Item discount amount
+        type: simple
+        label: Order Item Discount Amount
+        agg: sum
+        expr: item_discount_amount
+      - name: order_item_tax_amount
+        description: Item tax amount
+        type: simple
+        label: Order Item Tax Amount
+        agg: sum
+        expr: item_tax_amount
+      - name: order_item_net_sales_amount
+        description: Net item sales amount
+        type: simple
+        label: Order Item Net Sales Amount
+        agg: sum
+        expr: net_item_sales_amount
+      - name: order_item_total_cost
+        description: Total supplier cost across order items.
+        type: simple
+        label: Order Item Total Cost
+        agg: sum
+        expr: supplier_cost
