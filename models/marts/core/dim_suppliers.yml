@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: dim_suppliers
+    description: Suppliers dimensions table
+    semantic_model:
+      enabled: true
+    columns:
+      - name: supplier_key
+        description: primary key of the model
+        data_tests:
+          - unique
+          - not_null
+        entity:
+          type: primary
+          name: supplier
+      - name: supplier_name
+        description: '{{ doc("supplier_name") }}'
+        dimension:
+          type: categorical
+      - name: supplier_address
+        description: '{{ doc("supplier_address") }}'
+        dimension:
+          type: categorical
+      - name: nation
+        description: nation name
+        dimension:
+          type: categorical
+      - name: region
+        description: region name
+        dimension:
+          type: categorical
+      - name: phone_number
+        description: '{{ doc("phone_number") }}'
+        dimension:
+          type: categorical
+      - name: account_balance
+        description: '{{ doc("account_balance") }}'

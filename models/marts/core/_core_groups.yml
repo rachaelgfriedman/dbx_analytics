@@ -1,0 +1,7 @@
+version: 2
+
+groups:
+  - name: data_team
+    owner:
+      name: Data Team
+      email: data@acme.co

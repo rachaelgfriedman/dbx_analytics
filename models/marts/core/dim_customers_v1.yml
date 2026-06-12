@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: dim_customers_v1
+    config:
+      contract:
+        enforced: true
+      group: data_team
+      access: public
+    description: Customer dimensions table
+    semantic_model:
+      enabled: true
+      name: dim_customers
+    columns:
+      - name: customer_key
+        data_type: bigint
+        description: Primary key on the customers table
+        data_tests:
+          - unique
+          - not_null
+        entity:
+          type: primary
+          name: customer
+      - name: region
+        data_type: varchar(25)
+        description: region name
+        data_tests:
+          - accepted_values:
+              config:
+                severity: warn
+              arguments:
+                values: ['AFRICA', 'MIDDLE EAST', 'ASIA', 'EUROPE', 'AMERICA']
+        dimension:
+          type: categorical
+      - name: name
+        data_type: varchar(25)
+        description: customer id
+        dimension:
+          type: categorical
+      - name: address
+        data_type: varchar(40)
+        description: address of the customer
+        dimension:
+          type: categorical
+      - name: nation
+        data_type: varchar(25)
+        description: nation name
+        dimension:
+          type: categorical
+      - name: phone_number
+        data_type: varchar(15)
+        description: phone number of the customer
+        dimension:
+          type: categorical
+      - name: account_balance
+        data_type: decimal(38,0)
+        description: '{{ doc("account_balance") }}'
+      - name: market_segment
+        data_type: varchar(10)
+        description: market segment of the customer
+        dimension:
+          type: categorical
+      - name: lifetime_value
+        data_type: decimal(38,2)
+        description: lifetime value for the customer
+      - name: tier_name
+        data_type: string
+        description: tier of the customer
+        dimension:
+          type: categorical
+      - name: is_high_value
+        data_type: string
+        description: high revenue account
+        dimension:
+          type: categorical
+      - name: is_mid_value
+        data_type: string
+        description: mid revenue account
+        dimension:
+          type: categorical
+      - name: is_low_value
+        data_type: string
+        description: low revenue account
+        dimension:
+          type: categorical
