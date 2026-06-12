@@ -103,42 +103,37 @@ models:
         label: Order Net Sales Amount
         agg: sum
         expr: net_item_sales_amount
+      - name: order_avg_revenue_per_customer
+        description: Average net revenue per distinct customer placing orders.
+        type: ratio
+        label: Order Avg Revenue Per Customer
+        numerator: order_net_sales_amount
+        denominator: order_customer_count
+      - name: order_return_rate
+        description: Ratio of returned line items to orders.
+        type: ratio
+        label: Order Return Rate
+        numerator: order_return_count
+        denominator: order_count
+      - name: order_discount_rate
+        description: Ratio of discount amount to gross sales.
+        type: ratio
+        label: Order Discount Rate
+        numerator: order_discount_amount
+        denominator: order_gross_sales_amount
+      - name: cumulative_order_net_sales_amount
+        description: Running total of order net sales across all time.
+        type: cumulative
+        label: Cumulative Order Net Sales Amount
+        input_metric: order_net_sales_amount
+      - name: cumulative_order_net_sales_mtd
+        description: Month-to-date cumulative order net sales.
+        type: cumulative
+        label: Cumulative Order Net Sales MTD
+        grain_to_date: month
+        input_metric: order_net_sales_amount
 
 metrics:
-  - name: order_avg_revenue_per_customer
-    description: Average net revenue per distinct customer placing orders.
-    type: ratio
-    label: Order Avg Revenue Per Customer
-    numerator: order_net_sales_amount
-    denominator: order_customer_count
-
-  - name: order_return_rate
-    description: Ratio of returned line items to orders.
-    type: ratio
-    label: Order Return Rate
-    numerator: order_return_count
-    denominator: order_count
-
-  - name: order_discount_rate
-    description: Ratio of discount amount to gross sales.
-    type: ratio
-    label: Order Discount Rate
-    numerator: order_discount_amount
-    denominator: order_gross_sales_amount
-
-  - name: cumulative_order_net_sales_amount
-    description: Running total of order net sales across all time.
-    type: cumulative
-    label: Cumulative Order Net Sales Amount
-    input_metric: order_net_sales_amount
-
-  - name: cumulative_order_net_sales_mtd
-    description: Month-to-date cumulative order net sales.
-    type: cumulative
-    label: Cumulative Order Net Sales MTD
-    grain_to_date: month
-    input_metric: order_net_sales_amount
-
   - name: order_profit
     description: Profit calculated as net sales minus total supplier cost.
     type: derived
@@ -149,3 +144,4 @@ metrics:
         alias: revenue
       - name: order_item_total_cost
         alias: cost
+
