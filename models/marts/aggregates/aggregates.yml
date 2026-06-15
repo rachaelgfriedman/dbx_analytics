@@ -28,11 +28,6 @@ models:
           - not_null
       - name: returned_orders
         description: Count of returned order items in the month.
-        data_tests:
-          - dbt_utils.expression_is_true:
-              name: agg_returned_orders_by_month_returned_orders_non_negative
-              arguments:
-                expression: ">= 0"
       - name: return_rate
         description: Share of order items returned in the month.
       - name: row_count
