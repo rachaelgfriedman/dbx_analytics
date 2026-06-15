@@ -1,79 +1,49 @@
-# version: 2
+version: 2
 
-# models:
-#   # These two models are just different ways of doing the same thing (pivot over categories) using jinja and the PIVOT operation in Snowflake
-#   # - name: agg_ship_modes_hardcoded_pivot
-#   #   description: Example of creating a pivot table with dynamic columns based on the ship modes that are in the system
-#   #   columns:
-#   #     - name: order_year
-#   #       description: year of the order
+models:
+  - name: agg_daily_returned_orders
+    description: Daily aggregate of returned order items.
+    config:
+      tags:
+        - aggregates
+    columns:
+      - name: ds
+        description: Order date at day grain.
+        data_tests:
+          - unique
+          - not_null
+      - name: y
+        description: Daily returned order item count as a float.
 
-#   - name: agg_ship_modes_dynamic_pivot
-#     description: Example of creating a pivot table with hard-coded columns based on a query of the ship modes that are in the system
-#     columns:
-#       - name: order_year
-#         description: year of the order
-      
-#   - name: monthly_gross_revenue
-#     columns:
-#       - name: order_month
-#         data_tests:
-#           - unique
+  - name: agg_returned_orders_by_month
+    description: Monthly aggregate of returned orders and return rate.
+    config:
+      tags:
+        - aggregates
+    columns:
+      - name: order_month
+        description: Order month.
+        data_tests:
+          - unique
+          - not_null
+      - name: returned_orders
+        description: Count of returned order items in the month.
+        data_tests:
+          - dbt_utils.expression_is_true:
+              name: agg_returned_orders_by_month_returned_orders_non_negative
+              arguments:
+                expression: ">= 0"
+      - name: return_rate
+        description: Share of order items returned in the month.
+      - name: row_count
+        description: Total order item row count in the month.
 
-# exposures:
-#   - name: returned_orders
-#     type: dashboard
-#     maturity: high
-#     url: https://fishtown.looker.com/dashboards/606
-#     description: 
-#       How is our return rate trending over time?
-
-#     depends_on:
-#       - ref('agg_returned_orders_by_month')
-
-#     owner:
-#       name: Alex 
-#       email: alex.dinsmoor@dbtlabs.com 
-
-
-#   - name: active_orders
-#     type: dashboard
-#     maturity: high
-#     url: https://fishtown.looker.com/dashboards/493
-#     description: 
-#       Did someone say "exponential growth"?
-    
-#     depends_on:
-#       - ref('fct_orders')
-#       - ref('dim_suppliers')
-      
-#     owner:
-#       name: Isabela 
-#       email: isabela@dbtlabs.com
-
-#   - name: business_pulse
-#     type: dashboard
-#     maturity: high
-#     url: https://public.tableau.com/app/profile/mike.burke2608/viz/BDLDemo/BusinessPulse_1
-#     description: 
-#       Business Pulse for use by anyone looking to get insights on orders. 
-    
-#     depends_on:
-#       - ref('fct_orders')
-#       - ref('dim_suppliers')
-#       - ref('dim_customers_v1')
-
-#     owner:
-#       name: Business Operations Team 
-#       email: bizops@dbtlabs.com
-
-#   - name: yearly_part_rollup
-#     description: Rollup of orders
-#     type: dashboard 
-#     url: https://example.com
-#     maturity: high
-#     owner:
-#       name: DBT User Bob
-#       email: dbtuserbob@getdbt.com
-#     depends_on:
-#         - ref('agg_ship_modes_hardcoded_pivot')
+  - name: supplier_sales_by_year
+    description: Supplier sales aggregated by shipping year.
+    columns:
+      - name: supplier_name
+        description: Supplier name.
+      - name: shipping_year
+        description: Shipping year derived from ship date.
+      - name: net_sales_amount
+        description: Net item sales amount aggregated to supplier and year.
