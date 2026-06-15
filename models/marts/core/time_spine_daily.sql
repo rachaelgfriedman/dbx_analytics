@@ -9,7 +9,7 @@ with days as (
     {{
         dbt.date_spine(
             'day',
-            "to_date('2000-01-01')",
+            "to_date('1980-01-01')",
             "dateadd(day, 30, current_date)"
         )
     }}
@@ -23,4 +23,4 @@ final as (
 
 select *
 from final
-where date_day >= dateadd(year, -10, current_date)
+where date_day >= dateadd(year, -30, current_date)

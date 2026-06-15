@@ -6,6 +6,13 @@ models:
     semantic_model:
       enabled: true
     agg_time_dimension: order_date
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: fct_orders_discount_not_greater_than_gross_sales_warn
+          config:
+            severity: warn
+          arguments:
+            expression: item_discount_amount <= gross_item_sales_amount
     columns:
       - name: order_key
         description: primary key of the model
@@ -79,10 +86,10 @@ models:
         label: Order Customer Count
         agg: count_distinct
         expr: customer_key
-      - name: order_gross_sales_amount
-        description: Gross item sales amount
+      - name: order_total_revenue
+        description: Total revenue for the business
         type: simple
-        label: Order Gross Sales Amount
+        label: Order Total Revenue
         agg: sum
         expr: gross_item_sales_amount
       - name: order_discount_amount
@@ -120,7 +127,7 @@ models:
         type: ratio
         label: Order Discount Rate
         numerator: order_discount_amount
-        denominator: order_gross_sales_amount
+        denominator: order_total_revenue
       - name: cumulative_order_net_sales_amount
         description: Running total of order net sales across all time.
         type: cumulative
@@ -134,14 +141,13 @@ models:
         input_metric: order_net_sales_amount
 
 metrics:
-  - name: order_profit
-    description: Profit calculated as net sales minus total supplier cost.
+  - name: order_total_profit
+    description: Profit calculated as total revenue minus total supplier cost.
     type: derived
     label: Order Profit
     expr: revenue - cost
     input_metrics:
-      - name: order_net_sales_amount
+      - name: order_total_revenue
         alias: revenue
       - name: order_item_total_cost
         alias: cost
-

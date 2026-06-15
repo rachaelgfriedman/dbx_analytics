@@ -24,7 +24,11 @@ models:
     staging:
       +materialized: view
     marts:
+      intermediate:
+        +materialized: table
       core:
+        +materialized: table
+      aggregates:
         +materialized: table
 
 # ✅ Replace the Snowflake seed block with the seeds you added

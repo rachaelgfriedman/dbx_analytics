@@ -36,3 +36,12 @@ models:
           type: categorical
       - name: account_balance
         description: '{{ doc("account_balance") }}'
+      - name: supplier_tier
+        description: Supplier tier derived from account balance for demo purposes.
+        data_tests:
+          - not_null:
+              name: dim_suppliers_supplier_tier_warn_on_nulls
+              config:
+                severity: warn
+        dimension:
+          type: categorical

@@ -182,38 +182,4 @@ models:
       - name: estimated_tax
         description: Example derived value calculated from lifetime value.
 
-  - name: agg_daily_returned_orders
-    description: Daily aggregate of returned order items.
-    columns:
-      - name: ds
-        description: Order date at day grain.
-        data_tests:
-          - unique
-          - not_null
-      - name: y
-        description: Daily returned order item count as a float.
 
-  - name: agg_returned_orders_by_month
-    description: Monthly aggregate of returned orders and return rate.
-    columns:
-      - name: order_month
-        description: Order month.
-        data_tests:
-          - unique
-          - not_null
-      - name: returned_orders
-        description: Count of returned order items in the month.
-      - name: return_rate
-        description: Share of order items returned in the month.
-      - name: row_count
-        description: Total order item row count in the month.
-
-  - name: supplier_sales_by_year
-    description: Supplier sales aggregated by shipping year.
-    columns:
-      - name: supplier_name
-        description: Supplier name.
-      - name: shipping_year
-        description: Shipping year derived from ship date.
-      - name: net_sales_amount
-        description: Net item sales amount aggregated to supplier and year.
